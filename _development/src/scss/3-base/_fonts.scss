@@ -1,0 +1,12 @@
+// -----------------------------------------------------------------------------
+// This file contains all @font-face declarations, if any.
+// -----------------------------------------------------------------------------
+/* @import url('https://fonts.googleapis.com/css?family=Open+Sans:400,700'); */
+
+@include font-face(
+  'One Day',
+  '../fonts/oneday',
+  400,
+  null,
+  eot woff2 woff ttf svg
+);

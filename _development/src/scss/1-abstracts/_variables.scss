@@ -1,0 +1,111 @@
+// -----------------------------------------------------------------------------
+// This file contains all application-wide Sass variables.
+// -----------------------------------------------------------------------------
+
+/// Regular font family
+/// @type List
+$text-font-stack: 'Lato', sans-serif;
+$highlight-font-stack: 'One Day', sans-serif;
+
+/// Code (monospace) font family
+/// @type List
+$code-font-stack: 'Courier New', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono',
+  'Monaco', monospace;
+
+$black-color: rgb(0, 0, 0);
+$white-color: rgb(255, 255, 255);
+$body-color: #222831;
+
+$text-color: $black-color;
+
+/* Grid Variables */
+$main-gap: 15px;
+
+/* Font sizes */
+
+$h1-font-sizes: (
+  null: 5em
+);
+
+$h2-font-sizes: (
+  null: 4em
+);
+
+$h3-font-sizes: (
+  null: 3em
+);
+
+$h4-font-sizes: (
+  null: 1em
+);
+
+$h5-font-sizes: (
+  null: 0.825em
+);
+
+$h6-font-sizes: (
+  null: 0.625em
+);
+
+$p-font-sizes: (
+  null: 1em,
+  /* "x-small-max": 1em,
+  "small-min":1em,
+  "small-max":1em,
+  "medium-min":1em,
+  "medium-max":1em,
+  "large-min":1em,
+  "large-max":1em,
+  "x-large-min":1em */
+);
+
+/// Breakpoints map
+/// @prop {String} keys - Keys are identifiers mapped to a given length
+/// @prop {Map} values - Values are actual breakpoints expressed in pixels
+$breakpoints: (
+  'x-small-max': (
+    max-width: 575px
+  ),
+  'small-min': (
+    min-width: 576px
+  ),
+  'small-max': (
+    max-width: 767px
+  ),
+  'medium-min': (
+    min-width: 768px
+  ),
+  'medium-max': (
+    max-width: 991px
+  ),
+  'large-min': (
+    min-width: 992px
+  ),
+  'large-max': (
+    max-width: 1199px
+  ),
+  'x-large-min': (
+    min-width: 1200px
+  ),
+  'x-large-max': (
+    max-width: 1299px
+  ),
+  'xx-large-min': (
+    min-width: 1300px
+  ),
+  'xx-large-max': (
+    max-width: 1499px
+  ),
+  'xxx-large-min': (
+    min-width: 1500px
+  ),
+  'xxx-large-max': (
+    max-width: 1800px
+  )
+) !default;
+
+/// Relative or absolute URL where all assets are served from
+/// @type String
+/// @example scss - When using a CDN
+///   $base-url: 'http://cdn.example.com/assets/';
+$base-url: '/assets/' !default;
