@@ -1,5 +1,6 @@
 module.exports = {
-  plugins: {
-    autoprefixer: { grid: true }
-  }
+  plugins: [
+    require('autoprefixer')({ grid: true }),
+    require('postcss-object-fit-images')
+  ]
 };

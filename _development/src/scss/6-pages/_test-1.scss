@@ -1,0 +1,179 @@
+.test-1 {
+    .body {
+        background: linear-gradient(blue, pink);
+        max-width: 1920px;
+        min-height: 100vh;
+        margin: 0;
+        padding: 115px 62px 172px 62px;
+    }
+
+    // exemple
+
+    .head {
+    > h1 {
+        color: white;
+
+        /* H1 */
+        font-family: Poppins;
+        font-size: 140px;
+        font-style: normal;
+        font-weight: 300;
+        line-height: auto;
+        letter-spacing: -5.6px;
+
+        > span {
+        margin-left: 113px;
+        }
+    }
+
+    > div {
+        margin-top: 40px;
+        display: flex;
+        align-items: flex-end;
+        gap: 80px;
+
+        > p {
+        color: white;
+
+        /* H3 */
+        font-family: Poppins;
+        font-size: 26px;
+        font-style: normal;
+        font-weight: 400;
+        letter-spacing: -1.3px;
+        max-width: 638px;
+        }
+    }
+    }
+
+    .cards {
+    margin-top: 85px;
+    background-color: gold;
+
+    .card {
+        display: flex;
+        background-color: red;
+        width: 100%;
+
+        > div:nth-child(1) {
+        width: 50%;
+        background-color: purple;
+        }
+
+        > div:nth-child(2) {
+        width: 50%;
+        background-color: palegreen;
+        }
+    }
+    }
+
+    // MON CSS
+
+    .title {
+    margin-top: 40px;
+        display: flex;
+        align-items: flex-end;
+        gap: 80px;
+
+    color: white;
+
+    /* H1 */
+    font-family: Poppins;
+    font-size: 140px;
+    font-style: normal;
+    font-weight: 300;
+    letter-spacing: -5.6px;
+    }
+
+    .texte1 {
+    display: flex;
+        justify-content: flex-start;
+        align-items: flex-start;
+
+        gap: 80px;color: white;
+
+    /* H3 */
+    font-family: Poppins;
+    font-size: 26px;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: -1.3px;
+    }
+
+    .link1 {
+    display: flex;
+        justify-content: center;
+        align-items: flex-start;
+
+        color: blue;
+
+    /* H4 (16) - legende - CTA */
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 00;
+    }
+
+    .link2 {
+    display: flex;
+        justify-content: center;
+        align-items: flex-start;
+
+        color: blue;
+
+    /* H4 (16) - legende - CTA */
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    }
+
+    .tag1 {
+    display: flex;
+        justify-content: center;
+        align-items: flex-start;
+
+        color: green;
+
+    /* tag */
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px; /* 125% */
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    }
+
+    .texte2 {
+    display: flex;
+        justify-content: center;
+        align-items: flex-start;
+
+        color: white;
+
+    /* H2 */
+    font-family: Poppins;
+    font-size: 50px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 60px; /* 120% */
+    letter-spacing: -2.5px;
+    }
+
+    .tag2 {
+    display: flex;
+        justify-content: center;
+        align-items: flex-start;
+
+    color: white;
+    text-align: right;
+
+    /* H4 (16) - legende - CTA */
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px; /* 125% */
+    }
+}

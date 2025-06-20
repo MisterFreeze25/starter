@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html class="test-2" lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <title>Document</title>
+</head>
+<body class="body">
+  <h1>Swile</h1>
+  <img src="https://images.unsplash.com/photo-1726137570616-580645d83ebe?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyNTF8fHxlbnwwfHx8fHw%3D"/>
+  <p class="avantage mb-16">Trajets domicile-travail</p>
+  <p class="avantage mb-16">Titres-resto</p>
+  <a class="button" href="https://www.swile.co/fr-fr">Je veux Swile</a >
+  <div class="card">
+    <h2 class="mb-100">Les économie que j'ai pu faire grâce à Swile</h2>
+    <h3 class="econom mb-100">J'ai pu économisé pour acheter du sirop d'érable</h3>
+    <img class="mb-100" src="https://images.unsplash.com/photo-1551025119-77673c1d37cd?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8c2lyb3AlMjBkJyVDMyVBOXJhYmxlfGVufDB8fDB8fHww">
+    <h3 class="econom mb-100">J'ai pu économisé pour une belle maison</h3>
+    <img class=mb-100 src="https://images.unsplash.com/photo-1670101706203-ac081741f86c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bWFpc29uJTIwbW9jaGV8ZW58MHx8MHx8fDA%3D">
+  </div>
+
+  <div class="bloc mb-100">
+    <h2>Swile 99% d'avis positif</h2>
+
+    <div class="contenus">
+      <div class="textel">
+        <p class="econom">Tenter de gagner des réduction en<br>cliquant sur se bouton.</p>
+        <a class="button mb-16" href="https://help.swile.co/hc/fr/articles/18764179988882-Gagner-du-cashback-en-utilisant-Swile#:~:text=Vous%20pouvez%20obtenir%20du%20cashback,virement%20vers%20votre%20compte%20bancaire." target="_blank">Voir plus</a>
+        <p class="econom">La carte Swile facilite le quotidien de nos collaborateurs et de nos équipes.<strong> Rémi Tiab </strong>dévelopeur web.</p>
+      </div>
+
+      <div class="video">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/QxwdYR-fZOc?si=iGKaLYEx94ei4Iyt" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <div class="bloc2">
+    <h2>Nos conseils</h2>
+
+    <div>
+      <div>
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/nC2INplxenQ?si=xs_C4x2SWvpXuoQM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      </div>
+
+      <div>
+        <button class="accordion">Premiere suggestion</button>
+        <div class="panel">
+          <p class="econom">Je pose</p>
+        </div>
+
+        <button class="accordion">Deuxième suggestion</button>
+        <div class="panel">
+          <p class="econom"> Je propose</p>
+        </div>
+
+        <button class="accordion">Troisième suggestion</button>
+        <div class="panel">
+          <p class="econom">Je m'impose</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </body>
+
+  <script type="text/javascript">
+    var acc = document.getElementsByClassName("accordion");
+    var i;
+
+    for (i = 0; i < acc.length; i++) {
+      acc[i].addEventListener("click", function() {
+        /* Toggle between adding and removing the "active" class,
+        to highlight the button that controls the panel */
+        this.classList.toggle("active");
+
+        /* Toggle between hiding and showing the active panel */
+        var panel = this.nextElementSibling;
+        if (panel.style.display === "block") {
+          panel.style.display = "none";
+        } else {
+          panel.style.display = "block";
+        }
+      });
+    }
+  </script>
+</html>
+

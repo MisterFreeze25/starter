@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html class="jump" lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Space Jump</title>
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+
+<body>
+  <div id="ecranDemarrage">
+    <div>
+      <label for="inputPseudo">Ton pseudo :</label>
+      <input type="text" id="inputPseudo" maxlength="15">
+    </div>
+    <div>Appuie sur Flèche Gauche / Droite pour bouger</div>
+    <div>Évite les météorites et saute sur les plateformes</div>
+    <button id="boutonDemarrer">Démarrer</button>
+
+    <h3>Top 3 meilleurs scores</h3>
+    <ol id="topScores"></ol>
+    <p class="credits">Développé par Mister_Freeze</p>
+  </div>
+
+  <div class="hud">
+    <div>Score : <span id="score">0</span></div>
+    <div id="scoreABattre">Meilleur score à battre : 0</div>
+  </div>
+
+  <canvas id="jeu" width="600" height="900" style="display:none;"></canvas>
+  <canvas id="fondEspace" width="600" height="900" class="fond-espace"></canvas>
+
+  <div id="ecranFin" style="display:none; flex-direction: column;">
+    <div>Partie terminée !</div>
+    <div>Score final : <span id="scoreFinal">0</span></div>
+    <div>Pseudo : <span id="pseudoFinal"></span></div>
+    <button id="boutonRejouer">Rejouer</button>
+    <p class="credits">Développé par Mister_Freeze </p>
+  </div>
+</body>
+</html>
+
+<script>
+   const canvas = document.getElementById('jeu');
+const ctx = canvas.getContext('2d');
+
+const fondEspace = document.getElementById('fondEspace');
+const ctxFond = fondEspace.getContext('2d');
+
+const ecranDemarrage = document.getElementById('ecranDemarrage');
+const boutonDemarrer = document.getElementById('boutonDemarrer');
+const ecranFin = document.getElementById('ecranFin');
+const scoreFinalEl = document.getElementById('scoreFinal');
+const pseudoFinalEl = document.getElementById('pseudoFinal');
+const boutonRejouer = document.getElementById('boutonRejouer');
+const hud = document.querySelector('.hud');
+const scoreEl = document.getElementById('score');
+const inputPseudo = document.getElementById('inputPseudo');
+const topScoresEl = document.getElementById('topScores');
+
+let plateformes = [];
+let meteorites = [];
+let joueur;
+let touches = { gauche: false, droite: false };
+let score = 0;
+let enCours = false;
+let hauteurCamera = 0;
+let meilleurScore = 0;
+let confettiAffiche = false;
+let pseudo = '';
+
+const largeurPlateforme = 90;
+const hauteurPlateforme = 12;
+const gravite = 0.5;
+const vitesseRebond = -14;
+
+// --- Fonctions de gestion du top scores ---
+
+function chargerTopScores() {
+  const data = localStorage.getItem('spaceJumpTopScores');
+  if (data) return JSON.parse(data);
+  else return [];
+}
+
+function sauvegarderTopScores(topScores) {
+  localStorage.setItem('spaceJumpTopScores', JSON.stringify(topScores));
+}
+
+function ajouterScoreTop(pseudo, score) {
+  let topScores = chargerTopScores();
+  topScores.push({ pseudo, score });
+  topScores.sort((a, b) => b.score - a.score);
+  if (topScores.length > 3) topScores = topScores.slice(0, 3);
+  sauvegarderTopScores(topScores);
+}
+
+function afficherTopScores() {
+  const topScores = chargerTopScores();
+  topScoresEl.innerHTML = '';
+  if (topScores.length === 0) {
+    topScoresEl.innerHTML = '<li>Aucun score enregistré</li>';
+  } else {
+    topScores.forEach(entry => {
+      const li = document.createElement('li');
+      li.textContent = `${entry.pseudo} : ${entry.score}`;
+      topScoresEl.appendChild(li);
+    });
+  }
+}
+
+function mettreAJourScoreABattre() {
+  const topScores = chargerTopScores();
+  meilleurScore = topScores.length > 0 ? topScores[0].score : 0;
+  document.getElementById('scoreABattre').textContent = `Meilleur score à battre : ${meilleurScore}`;
+}
+
+
+// --- Jeu ---
+
+function aleatoire(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function initialiserJeu() {
+  plateformes = [];
+  meteorites = [];
+  hauteurCamera = 0;
+  score = 0;
+  scoreEl.textContent = '0';
+
+  plateformes.push({
+    x: canvas.width / 2 - largeurPlateforme / 2,
+    y: canvas.height - 60,
+    marque: true,
+    mouvante: false,
+    dx: 0
+  });
+
+  let y = canvas.height - 100;
+  while (y > -12000) {
+    let x = aleatoire(20, canvas.width - largeurPlateforme - 20);
+    const mouvante = Math.random() < 0.2;
+    const dx = mouvante ? (Math.random() < 0.5 ? -1.5 : 1.5) : 0;
+    plateformes.push({ x, y, marque: false, mouvante, dx });
+    y -= aleatoire(30, 70);
+  }
+
+  joueur = {
+    largeur: 24,
+    hauteur: 32,
+    x: canvas.width / 2 - 12,
+    y: canvas.height - 100,
+    dx: 0,
+    dy: 0,
+  };
+}
+
+function dessinerRectPixel(x, y, w, h, couleur, bordureCouleur = null) {
+  ctx.fillStyle = couleur;
+  ctx.fillRect(x, y, w, h);
+  if (bordureCouleur) {
+    ctx.strokeStyle = bordureCouleur;
+    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+  }
+}
+
+function dessinerJoueur() {
+  const px = joueur.x;
+  const py = joueur.y - hauteurCamera;
+
+  dessinerRectPixel(px + 4, py + 4, 16, 16, '#f0f8ff', '#8ab9ff');
+  dessinerRectPixel(px + 8, py + 8, 8, 8, '#aaddff', '#4d85c3');
+
+  dessinerRectPixel(px + 6, py + 20, 12, 12, '#003366', '#001933');
+
+  dessinerRectPixel(px + 2, py + 20, 4, 8, '#002244', '#001122');
+  dessinerRectPixel(px + 18, py + 20, 4, 8, '#002244', '#001122');
+
+  dessinerRectPixel(px + 6, py + 32, 6, 6, '#001122', '#000000');
+  dessinerRectPixel(px + 12, py + 32, 6, 6, '#001122', '#000000');
+}
+
+function dessinerPlateformes() {
+  plateformes.forEach(p => {
+    const py = p.y - hauteurCamera;
+    if (py > -20 && py < canvas.height + 20) {
+      dessinerRectPixel(p.x, py, largeurPlateforme, hauteurPlateforme, '#004466', '#002233');
+      ctx.fillStyle = '#0088cc';
+      for (let i = 0; i < 5; i++) {
+        ctx.fillRect(p.x + 5 + i * 16, py + 3, 4, 6);
+      }
+    }
+  });
+}
+
+function majPlateformes() {
+  plateformes.forEach(p => {
+    if (p.mouvante) {
+      p.x += p.dx;
+      if (p.x <= 0 || p.x + largeurPlateforme >= canvas.width) {
+        p.dx = -p.dx;
+      }
+    }
+  });
+}
+
+function dessinerMeteorites() {
+  meteorites.forEach(m => {
+    const py = m.y - hauteurCamera;
+
+    const gradient = ctx.createRadialGradient(
+      m.x + m.taille / 2,
+      py + m.taille / 2,
+      m.taille / 6,
+      m.x + m.taille / 2,
+      py + m.taille / 2,
+      m.taille / 2
+    );
+    gradient.addColorStop(0, '#ff5500');
+    gradient.addColorStop(1, '#aa2200');
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.ellipse(m.x + m.taille / 2, py + m.taille / 2, m.taille / 2, m.taille / 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#660000';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffcc33';
+    ctx.beginPath();
+    ctx.arc(m.x + m.taille * 0.25, py + m.taille * 0.4, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(m.x + m.taille * 0.7, py + m.taille * 0.7, 2, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function majMeteorites() {
+  meteorites.forEach(m => (m.y += m.dy));
+  meteorites = meteorites.filter(m => m.y < hauteurCamera + canvas.height + 30);
+}
+
+function verifierCollisionMeteorite() {
+  for (let m of meteorites) {
+    if (
+      joueur.x < m.x + m.taille &&
+      joueur.x + joueur.largeur > m.x &&
+      joueur.y < m.y + m.taille &&
+      joueur.y + joueur.hauteur > m.y
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function ajouterMeteorite() {
+  const taille = aleatoire(20, 30);
+  meteorites.push({
+    x: aleatoire(0, canvas.width - taille),
+    y: hauteurCamera - 50,
+    dy: aleatoire(3, 6),
+    taille,
+  });
+}
+
+function majJoueur() {
+  if (touches.gauche) joueur.dx = -6;
+  else if (touches.droite) joueur.dx = 6;
+  else joueur.dx = 0;
+
+  joueur.x += joueur.dx;
+
+  if (joueur.x < 0) joueur.x = 0;
+  if (joueur.x + joueur.largeur > canvas.width) joueur.x = canvas.width - joueur.largeur;
+
+  joueur.dy += gravite;
+
+  joueur.y += joueur.dy;
+
+  const yAvant = joueur.y - joueur.dy;
+
+  plateformes.forEach(p => {
+    if (
+      joueur.dy > 0 &&
+      joueur.x + joueur.largeur > p.x &&
+      joueur.x < p.x + largeurPlateforme &&
+      yAvant + joueur.hauteur <= p.y &&
+      joueur.y + joueur.hauteur >= p.y
+    ) {
+      joueur.y = p.y - joueur.hauteur;
+      joueur.dy = vitesseRebond;
+      if (!p.marque) {
+        p.marque = true;
+        score++;
+        scoreEl.textContent = score;
+      }
+        if (score > meilleurScore && !confettiAffiche) {
+    lancerConfettis();
+    confettiAffiche = true;
+  }
+    }
+  });
+
+  if (joueur.y - hauteurCamera > canvas.height) {
+    terminerJeu();
+  }
+
+  if (joueur.y < hauteurCamera + canvas.height / 3) {
+    hauteurCamera = joueur.y - canvas.height / 3;
+  }
+}
+
+function dessiner() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  dessinerPlateformes();
+  dessinerMeteorites();
+  dessinerJoueur();
+}
+
+function loop() {
+  if (!enCours) return;
+
+  majPlateformes();
+  majMeteorites();
+  majJoueur();
+
+  if (Math.random() < 0.03) {
+    ajouterMeteorite();
+  }
+
+  if (verifierCollisionMeteorite()) {
+    terminerJeu();
+    return;
+  }
+
+  dessiner();
+
+  requestAnimationFrame(loop);
+}
+
+function demarrerJeu() {
+   pseudo = inputPseudo.value.trim();
+  if (pseudo === '' || /\s/.test(pseudo)) {
+  alert('Le pseudo ne doit pas être vide ni contenir d\'espace.');
+  return;
+  }
+  enCours = true;
+  ecranDemarrage.style.display = 'none';
+  ecranFin.style.display = 'none';
+  hud.style.display = 'block';
+  canvas.style.display = 'block';
+
+  mettreAJourScoreABattre(); // Ajouté ici
+
+  initialiserJeu();
+  loop();
+}
+
+function terminerJeu() {
+  enCours = false;
+  scoreFinalEl.textContent = score;
+  pseudoFinalEl.textContent = pseudo;
+  ecranFin.style.display = 'flex';
+  hud.style.display = 'none';
+  canvas.style.display = 'none';
+
+  ajouterScoreTop(pseudo, score);
+  afficherTopScores();
+}
+
+boutonDemarrer.addEventListener('click', demarrerJeu);
+boutonRejouer.addEventListener('click', () => {
+  ecranFin.style.display = 'none';
+  inputPseudo.value = pseudo; // On remet le pseudo précédent
+  demarrerJeu();
+});
+
+window.addEventListener('keydown', e => {
+  if (e.code === 'ArrowLeft') touches.gauche = true;
+  else if (e.code === 'ArrowRight') touches.droite = true;
+});
+window.addEventListener('keyup', e => {
+  if (e.code === 'ArrowLeft') touches.gauche = false;
+  else if (e.code === 'ArrowRight') touches.droite = false;
+});
+
+// Fond étoilé simple
+function dessinerFond() {
+  ctxFond.clearRect(0, 0, fondEspace.width, fondEspace.height);
+
+  for (let i = 0; i < 150; i++) {
+    ctxFond.fillStyle = 'white';
+    const x = Math.random() * fondEspace.width;
+    const y = Math.random() * fondEspace.height;
+    const taille = Math.random() * 1.5;
+    ctxFond.fillRect(x, y, taille, taille);
+  }
+}
+
+dessinerFond();
+afficherTopScores();
+mettreAJourScoreABattre();
+
+function lancerConfettis() {
+  const canvasConfetti = document.createElement('canvas');
+  canvasConfetti.style.position = 'fixed';
+  canvasConfetti.style.top = '0';
+  canvasConfetti.style.left = '0';
+  canvasConfetti.style.width = '100%';
+  canvasConfetti.style.height = '100%';
+  canvasConfetti.style.pointerEvents = 'none';
+  canvasConfetti.id = 'confettiCanvas';
+  document.body.appendChild(canvasConfetti);
+
+  const confetti = canvasConfetti.getContext('2d');
+  const particles = [];
+
+  for (let i = 0; i < 150; i++) {
+    particles.push({
+      x: Math.random() * canvasConfetti.width,
+      y: Math.random() * canvasConfetti.height,
+      r: Math.random() * 6 + 4,
+      d: Math.random() * 40 + 10,
+      color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+      tilt: Math.random() * 10 - 10,
+      tiltAngle: 0,
+    });
+  }
+
+  function drawConfetti() {
+    confetti.clearRect(0, 0, canvasConfetti.width, canvasConfetti.height);
+    particles.forEach(p => {
+      confetti.beginPath();
+      confetti.lineWidth = p.r;
+      confetti.strokeStyle = p.color;
+      confetti.moveTo(p.x + p.tilt + p.r / 2, p.y);
+      confetti.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+      confetti.stroke();
+    });
+    update();
+  }
+
+  function update() {
+    for (let p of particles) {
+      p.tiltAngle += 0.1;
+      p.y += Math.cos(p.d) + 2;
+      p.tilt = Math.sin(p.tiltAngle) * 15;
+
+      if (p.y > window.innerHeight) {
+        p.y = -10;
+        p.x = Math.random() * canvasConfetti.width;
+      }
+    }
+  }
+
+  function animate() {
+    drawConfetti();
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+
+  // Supprimer les confettis après 5 secondes
+  setTimeout(() => {
+    document.body.removeChild(canvasConfetti);
+  }, 5000);
+}
+</script>

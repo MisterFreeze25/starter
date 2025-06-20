@@ -1,0 +1,85 @@
+.tetris {
+  /* RESET & BASE */
+  * {
+    box-sizing: border-box;
+    font-family: 'Press Start 2P', cursive, monospace;
+  }
+  body {
+    height: 100vh;
+    margin: 0;
+    background: linear-gradient(135deg, #1a1a1a, #121212);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    user-select: none;
+  }
+  #game-container {
+    position: relative;
+    width: 320px;
+    height: 640px;
+    border: 3px solid #f4c842; /* réduit de 8px à 3px */
+    background: #222;
+    box-shadow:
+      inset 0 0 10px #f4c842aa, /* plus léger */
+      0 0 15px #f4c84288;       /* plus doux */
+    image-rendering: pixelated;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    background: #111;
+    image-rendering: pixelated;
+    border: 1.5px solid #f4c842; /* réduit de 3px à 1.5px */
+    box-shadow: 0 0 5px #f4c842aa; /* plus subtil */
+    border-radius: 6px;
+    margin: auto;
+  }
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(30, 30, 30, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    text-align: center;
+    font-size: 1.4rem;
+    border-radius: 10px;
+    z-index: 10;
+    transition: opacity 0.3s ease;
+  }
+  .overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .overlay h1 {
+    font-size: 3rem;
+    color: #f4c842;
+    text-shadow: 1px 1px 0 #000;
+    margin: 0;
+  }
+  button {
+    padding: 0.8rem 1.8rem;
+    background: #f4c842;
+    color: #282828;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: 0.3s ease;
+    box-shadow: 0 4px #b38a1c;
+    user-select: none;
+    filter: drop-shadow(0 0 3px #f4c842);
+  }
+  button:active {
+    box-shadow: none;
+    transform: translateY(4px);
+  }
+  button:hover {
+    background: #f7db6a;
+  }
+}

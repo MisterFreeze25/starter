@@ -1,0 +1,161 @@
+.jump {
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+    * {
+    box-sizing: border-box;
+    }
+
+    body {
+    margin: 0;
+    background: #0a0a1a; /* très sombre mais pas noir total */
+    font-family: 'Orbitron', sans-serif;
+    overflow: hidden;
+    color: #e0e0ff; /* couleur douce pour le texte */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh; /* pour que flexbox fonctionne pleinement */
+    justify-content: center; /* centrage vertical */
+    text-align: center; /* centrage texte global */
+    }
+
+    #jeu {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid #5577cc; /* cadre discret bleu doux */
+    box-shadow: 0 0 8px #5577cc33; /* léger halo */
+    z-index: 2;
+    background: radial-gradient(white 1px, transparent 1px),
+                radial-gradient(white 1px, transparent 1px);
+    }
+
+    #fondEspace {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    background: radial-gradient(white 1px, transparent 1px),
+                radial-gradient(white 1px, transparent 1px);
+    background-position: 0 0, 25px 25px;
+    background-size: 50px 50px;
+    opacity: 0.15;
+    pointer-events: none;
+    }
+
+    #ecranDemarrage,
+    #ecranFin {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background: rgba(18, 18, 50, 0.9);
+    padding: 30px 40px;
+    border: 1.5px solid #5577cc;
+    border-radius: 10px;
+    z-index: 10;
+    width: 300px;
+    color: #d0d8ff;
+    box-shadow: 0 0 12px #5577cc88;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px; /* espace vertical entre les enfants */
+    }
+
+    #ecranDemarrage h1,
+    #ecranFin h1 {
+    font-size: 24px;
+    margin-bottom: 0;
+    }
+
+    #ecranDemarrage > div,
+    #ecranFin > div {
+    margin-bottom: 0; /* on gère l'espacement via gap */
+    line-height: 1.6; /* espace vertical entre lignes */
+    }
+
+    button {
+    background-color: transparent;
+    color: #5577cc;
+    border: 1.5px solid #5577cc;
+    padding: 10px 22px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    transition: all 0.3s ease;
+    box-shadow: none;
+    user-select: none;
+    }
+
+    button:hover {
+    background-color: #5577cc22;
+    box-shadow: 0 0 6px #5577cc88;
+    }
+
+    .hud {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    display: flex;
+    justify-content: space-between;
+    color: #aaccee;
+    font-size: 18px;
+    font-weight: 600;
+    text-shadow: 0 0 3px #5577ccaa;
+    z-index: 5;
+    user-select: none;
+    text-align: center;
+    }
+
+    #scoreABattre {
+    font-size: 16px;
+    margin-top: 4px;
+    color: #aabbee;
+    }
+
+    #inputPseudo {
+    font-size: 16px;
+    padding: 6px 10px;
+    margin-bottom: 10px;
+    width: 170px;
+    text-align: center;
+    border-radius: 6px;
+    border: 1.5px solid #5577cc;
+    background: #1a1a3a;
+    color: #d0d8ff;
+    }
+
+    #topScores {
+    margin-top: 10px;
+    text-align: center; /* je centre la liste */
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 0;
+    color: #c0c8ff;
+    list-style-type: none;
+    }
+
+    #topScores li {
+    margin-bottom: 8px;
+    font-size: 16px;
+    letter-spacing: 0.02em;
+    }
+
+    .credits {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #8090c0;
+    font-style: italic;
+    text-shadow: none;
+    }
+}

@@ -1,0 +1,126 @@
+.test-3 {
+
+    .body {
+        background: #00c1b5;
+        max-width: 1920px;
+        min-height: 100vh;
+        margin: 0;
+        padding: 50px 50px 50px 50px;
+    }
+    
+    .bloc {
+    
+        width: 100%;
+    
+        & > div {
+            display: flex;
+            align-items: center;
+    
+            > div {
+                    width: 50% ;
+            }
+        }
+    
+        .start {
+    
+            justify-content: space-between;
+    
+        }
+    
+            .important {
+    
+                /* H1 */
+                font-family: Poppins;
+                font-size: 60px;
+                font-style: normal;
+                font-weight: 300;
+                line-height: auto;
+            }
+    
+            .info {
+    
+                font-family: Poppins;
+                font-size: 25px;
+                font-style: normal;
+                font-weight: 300;
+                line-height: auto;
+            }
+    
+            .img {
+                text-align: center;
+                justify-content: center;
+            }
+    
+    }
+    
+    .bloc3 {
+    
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+    
+        > div {
+            align-items: center;
+            gap: 0px;
+            width: 100%;
+        }
+    
+        .texte {
+            font-family: Poppins;
+            font-size: 30px;
+            font-style: normal;
+            font-weight: 300;
+            line-height: auto;
+        }
+    
+        .lien {
+            color: white;
+    
+            font-family: Poppins;
+            font-size: 30px;
+            font-style: normal;
+            font-weight: 300;
+            line-height: auto;
+        }
+    
+        .issue {
+            opacity: 0.6;
+    
+            font-family: Poppins;
+            font-size: 30px;
+            font-style: normal;
+            font-weight: 300;
+            line-height: auto;
+        }
+    
+        .studio {
+            opacity: 0.6;
+    
+            font-family: Poppins;
+            font-size: 20px;
+            font-style: normal;
+            font-weight: 300;
+            line-height: auto;
+        }
+    
+        .B {
+            text-align: center;
+        }
+    
+        .C {
+            text-align: end;
+        }
+    
+        .mb-40 {
+            margin-bottom: 40px;
+        }
+    
+        .mt-180 {
+            margin-top: 180px;
+        }
+    
+        .mt-40 {
+            margin-top: 40px;
+        }
+    }
+}

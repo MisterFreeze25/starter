@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html class="snake" lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Snake</title>
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+  <div id="menu">
+    <h1>Snake</h1>
+    <div id="score">Score : 0</div>
+
+    <div id="difficulty">
+      <label>Difficulté :</label><br />
+      <button id="facileBtn" class="difficulty-btn" data-speed="12">Facile</button>
+      <button id="normalBtn" class="difficulty-btn" data-speed="8">Normal</button>
+      <button id="difficileBtn" class="difficulty-btn" data-speed="4">Difficile</button>
+    </div>
+
+    <button id="startButton">Démarrer</button>
+    <button id="restartButton" style="display:none;">Rejouer</button>
+  </div>
+
+  <canvas id="jeu"></canvas>
+
+  <script src="assets/js/script.js"></script>
+</body>
+</html>
+
+<script>
+    window.onload = function () {
+    const canvas = document.getElementById('jeu');
+    const ctx = canvas.getContext('2d');
+    const grid = 25;
+
+    let count = 0;
+    let score = 0;
+    let gameRunning = false;
+    let difficulty = 'normal';
+    let frameSpeed = 8;
+
+    let snake, apple, cellsPerRow, cellsPerCol;
+
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min)) + min;
+    }
+
+    function updateScore() {
+      document.getElementById('score').textContent = "Score : " + score;
+    }
+
+    function resize() {
+      canvas.width = 1200;
+      canvas.height = 720;
+      cellsPerRow = Math.floor(canvas.width / grid);
+      cellsPerCol = Math.floor(canvas.height / grid);
+      if (!gameRunning) resetGame();
+    }
+
+    function resetGame() {
+      snake = {
+        x: Math.floor(cellsPerRow / 2) * grid,
+        y: Math.floor(cellsPerCol / 2) * grid,
+        dx: grid,
+        dy: 0,
+        cells: [],
+        maxCells: 4
+      };
+
+      apple = {
+        x: getRandomInt(0, cellsPerRow) * grid,
+        y: getRandomInt(0, cellsPerCol) * grid
+      };
+
+      score = 0;
+      updateScore();
+      updateSpeed();
+    }
+
+    function updateSpeed() {
+      if (difficulty === 'facile') frameSpeed = 12;
+      else if (difficulty === 'normal') frameSpeed = 8;
+      else if (difficulty === 'difficile') frameSpeed = 4;
+    }
+
+    function drawApple(x, y) {
+      ctx.fillStyle = '#ff4d6d';
+      ctx.beginPath();
+      ctx.ellipse(x + grid / 2, y + grid / 2, grid / 2.5, grid / 3.5, 0, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+
+    function drawSnakeSegment(x, y, isHead = false) {
+      ctx.fillStyle = '#6a0dad';
+      ctx.strokeStyle = '#3a003f';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(x + 2, y + 2, grid - 4, grid - 4, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      if (isHead) {
+        ctx.fillStyle = '#fff';
+        const eyeSize = grid / 6;
+        ctx.beginPath();
+        ctx.arc(x + grid / 3, y + grid / 3, eyeSize, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x + 2 * grid / 3, y + grid / 3, eyeSize, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(x + grid / 3, y + grid / 3, eyeSize / 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x + 2 * grid / 3, y + grid / 3, eyeSize / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function gameOver() {
+      gameRunning = false;
+      document.getElementById('restartButton').style.display = 'inline-block';
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#fff';
+      ctx.font = '48px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText("Perdu", canvas.width / 2, canvas.height / 2 - 30);
+      ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 30);
+    }
+
+    function loop() {
+      if (!gameRunning) return;
+      requestAnimationFrame(loop);
+
+      if (++count < frameSpeed) return;
+      count = 0;
+
+      ctx.fillStyle = '#aad751';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      snake.x += snake.dx;
+      snake.y += snake.dy;
+
+      if (snake.x < 0) snake.x = (cellsPerRow - 1) * grid;
+      else if (snake.x >= cellsPerRow * grid) snake.x = 0;
+
+      if (snake.y < 0) snake.y = (cellsPerCol - 1) * grid;
+      else if (snake.y >= cellsPerCol * grid) snake.y = 0;
+
+      snake.cells.unshift({ x: snake.x, y: snake.y });
+      if (snake.cells.length > snake.maxCells) snake.cells.pop();
+
+      if (snake.x === apple.x && snake.y === apple.y) {
+        snake.maxCells++;
+        score++;
+        updateScore();
+        do {
+          apple.x = getRandomInt(0, cellsPerRow) * grid;
+          apple.y = getRandomInt(0, cellsPerCol) * grid;
+        } while (snake.cells.some(c => c.x === apple.x && c.y === apple.y));
+      }
+
+      drawApple(apple.x, apple.y);
+
+      snake.cells.forEach((cell, index) => {
+        drawSnakeSegment(cell.x, cell.y, index === 0);
+        for (let i = index + 1; i < snake.cells.length; i++) {
+          if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+            gameOver();
+          }
+        }
+      });
+    }
+
+    document.addEventListener('keydown', e => {
+      if (!gameRunning) return;
+      const { dx, dy } = snake;
+      switch (e.key) {
+        case "ArrowLeft": if (dx === 0) { snake.dx = -grid; snake.dy = 0; } break;
+        case "ArrowUp": if (dy === 0) { snake.dy = -grid; snake.dx = 0; } break;
+        case "ArrowRight": if (dx === 0) { snake.dx = grid; snake.dy = 0; } break;
+        case "ArrowDown": if (dy === 0) { snake.dy = grid; snake.dx = 0; } break;
+      }
+    });
+
+    // Sélection difficulté
+    document.getElementById('facileBtn').addEventListener('click', () => difficulty = 'facile');
+    document.getElementById('normalBtn').addEventListener('click', () => difficulty = 'normal');
+    document.getElementById('difficileBtn').addEventListener('click', () => difficulty = 'difficile');
+
+    // Bouton démarrer
+    document.getElementById('startButton').addEventListener('click', () => {
+      gameRunning = true;
+      resetGame();
+      document.getElementById('startButton').style.display = 'none';
+      document.getElementById('restartButton').style.display = 'none';
+      document.getElementById('difficulty').style.display = 'none'; // Cacher la div des boutons de difficulté
+      requestAnimationFrame(loop);
+    });
+
+    // Bouton rejouer
+    document.getElementById('restartButton').addEventListener('click', () => {
+      gameRunning = true;
+      resetGame();
+      document.getElementById('restartButton').style.display = 'none';
+      document.getElementById('startButton').style.display = 'inline-block';
+      document.getElementById('difficulty').style.display = 'block';
+    });
+
+
+    window.addEventListener('resize', resize);
+    resize();
+  };
+</script>

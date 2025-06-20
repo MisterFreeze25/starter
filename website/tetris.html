@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html class="tetris" lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Tetris</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <div id="game-container">
+    <canvas id="game" width="320" height="640"></canvas>
+
+    <div id="start-screen" class="overlay">
+      <h1>TETRIS</h1>
+      <button id="start-btn">Démarrer</button>
+    </div>
+
+    <div id="game-over-screen" class="overlay hidden">
+      <h1>Perdu</h1>
+      <button id="restart-btn">Rejouer</button>
+    </div>
+  </div>
+
+  <script src="tetris.js"></script>
+</body>
+</html>
+
+<script>
+        // Variables globales et constantes
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const grid = 32;
+    const cols = 10;
+    const rows = 20;
+
+    const startScreen = document.getElementById('start-screen');
+    const startBtn = document.getElementById('start-btn');
+    const gameOverScreen = document.getElementById('game-over-screen');
+    const restartBtn = document.getElementById('restart-btn');
+
+    const colors = {
+    'I': '#00ffff',   // cyan
+    'O': '#ffff00',   // jaune
+    'T': '#a020f0',   // violet
+    'S': '#00ff00',   // vert clair
+    'Z': '#ff0000',   // rouge vif
+    'J': '#0000ff',   // bleu
+    'L': '#ff9900'    // orange
+    };
+
+    // Tetrominos shapes (SRS standard)
+    const tetrominos = {
+    I: [
+        [0,0,0,0],
+        [1,1,1,1],
+        [0,0,0,0],
+        [0,0,0,0]
+    ],
+    J: [
+        [1,0,0],
+        [1,1,1],
+        [0,0,0]
+    ],
+    L: [
+        [0,0,1],
+        [1,1,1],
+        [0,0,0]
+    ],
+    O: [
+        [1,1],
+        [1,1]
+    ],
+    S: [
+        [0,1,1],
+        [1,1,0],
+        [0,0,0]
+    ],
+    Z: [
+        [1,1,0],
+        [0,1,1],
+        [0,0,0]
+    ],
+    T: [
+        [0,1,0],
+        [1,1,1],
+        [0,0,0]
+    ]
+    };
+
+    let playfield = [];
+    let currentTetromino = null;
+    let tetrominoSequence = [];
+    let gameOver = false;
+    let animationId = null;
+    let dropCounter = 0;
+    let dropInterval = 20; // plus petit = plus rapide (frames entre chute)
+
+    let lastTime = 0;
+
+    // Initialiser le tableau playfield (2D)
+    function initPlayfield() {
+    playfield = [];
+    for(let r = 0; r < rows; r++) {
+        playfield[r] = [];
+        for(let c = 0; c < cols; c++) {
+        playfield[r][c] = 0;
+        }
+    }
+    }
+
+    // Génère la séquence aléatoire des tetrominos
+    function generateSequence() {
+    const sequence = ['I','J','L','O','S','T','Z'];
+    while(sequence.length > 0) {
+        const rand = Math.floor(Math.random() * sequence.length);
+        tetrominoSequence.push(sequence.splice(rand, 1)[0]);
+    }
+    }
+
+    // Retourne le prochain tetromino de la séquence
+    function getNextTetromino() {
+    if (tetrominoSequence.length === 0) generateSequence();
+    const name = tetrominoSequence.pop();
+    const matrix = tetrominos[name];
+    const col = Math.floor(cols / 2) - Math.ceil(matrix[0].length / 2);
+    const row = -2; // commence au-dessus de l'écran
+    return {name, matrix, row, col};
+    }
+
+    // Dessine un bloc carré avec un style cartoon vintage
+    function drawBlock(x, y, color) {
+    // Base color
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, grid-1, grid-1);
+
+    // Contour pixelisé
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x+1, y+1, grid-3, grid-3);
+
+    // Ombre interne claire pour effet cartoon
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x+2, y+grid-4);
+    ctx.lineTo(x+2, y+2);
+    ctx.lineTo(x+grid-4, y+2);
+    ctx.stroke();
+    }
+
+    // Dessine le playfield (la grille avec les blocs posés)
+    function drawPlayfield() {
+    for(let r = 0; r < rows; r++) {
+        for(let c = 0; c < cols; c++) {
+        if(playfield[r][c]) {
+            drawBlock(c * grid, r * grid, colors[playfield[r][c]]);
+        }
+        else {
+            // fond de chaque case (ombrée)
+            ctx.fillStyle = '#222';
+            ctx.fillRect(c * grid, r * grid, grid-1, grid-1);
+        }
+        }
+    }
+    }
+
+    // Dessine le tetromino actif
+    function drawTetromino() {
+    if (!currentTetromino) return;
+    const {matrix, row, col, name} = currentTetromino;
+
+    for(let r = 0; r < matrix.length; r++) {
+        for(let c = 0; c < matrix[r].length; c++) {
+        if(matrix[r][c]) {
+            const x = (col + c) * grid;
+            const y = (row + r) * grid;
+            if (y >= 0) drawBlock(x, y, colors[name]);
+        }
+        }
+    }
+    }
+
+    // Rotation 90 degrés
+    function rotate(matrix) {
+    const N = matrix.length - 1;
+    return matrix.map((row, i) =>
+        row.map((val, j) => matrix[N - j][i])
+    );
+    }
+
+    // Vérifie si le déplacement est valide
+    function isValidMove(matrix, row, col) {
+    for(let r = 0; r < matrix.length; r++) {
+        for(let c = 0; c < matrix[r].length; c++) {
+        if(matrix[r][c]) {
+            const x = col + c;
+            const y = row + r;
+
+            if (x < 0 || x >= cols || y >= rows) return false;
+            if (y >= 0 && playfield[y][x]) return false;
+        }
+        }
+    }
+    return true;
+    }
+
+    // Place le tetromino dans le playfield (le solidifie)
+    function placeTetromino() {
+    const {matrix, row, col, name} = currentTetromino;
+
+    for(let r = 0; r < matrix.length; r++) {
+        for(let c = 0; c < matrix[r].length; c++) {
+        if(matrix[r][c]) {
+            const y = row + r;
+            const x = col + c;
+
+            // Si pièce en haut hors écran = game over
+            if(y < 0) {
+            endGame();
+            return;
+            }
+
+            playfield[y][x] = name;
+        }
+        }
+    }
+    clearLines();
+    currentTetromino = getNextTetromino();
+    }
+
+    // Nettoie les lignes complètes
+    function clearLines() {
+    for(let r = rows - 1; r >= 0; r--) {
+        if(playfield[r].every(cell => cell !== 0)) {
+        // ligne complète -> supprime et décale vers le bas
+        for(let y = r; y > 0; y--) {
+            playfield[y] = [...playfield[y-1]];
+        }
+        playfield[0] = new Array(cols).fill(0);
+        r++; // vérifier la même ligne encore une fois car descendue
+        }
+    }
+    }
+
+    // Fonction principale de boucle de jeu
+    function update(time = 0) {
+    if(gameOver) return;
+
+    const deltaTime = time - lastTime;
+    lastTime = time;
+
+    dropCounter += deltaTime;
+
+    if(dropCounter > dropInterval * 16) { // 16 ms par frame approx.
+        dropCounter = 0;
+        const newRow = currentTetromino.row + 1;
+
+        if(isValidMove(currentTetromino.matrix, newRow, currentTetromino.col)) {
+        currentTetromino.row = newRow;
+        }
+        else {
+        placeTetromino();
+        }
+    }
+
+    draw();
+    animationId = requestAnimationFrame(update);
+    }
+
+    // Dessine tout
+    function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawPlayfield();
+    drawTetromino();
+    }
+
+    // Fin du jeu
+    function endGame() {
+    gameOver = true;
+    cancelAnimationFrame(animationId);
+    gameOverScreen.classList.remove('hidden');
+    }
+
+    // Gérer les entrées clavier
+    function handleKey(e) {
+    if(gameOver) return;
+
+    if(e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        const col = e.key === 'ArrowLeft'
+        ? currentTetromino.col - 1
+        : currentTetromino.col + 1;
+
+        if(isValidMove(currentTetromino.matrix, currentTetromino.row, col)) {
+        currentTetromino.col = col;
+        }
+    }
+    else if(e.key === 'ArrowUp') {
+        const rotated = rotate(currentTetromino.matrix);
+        if(isValidMove(rotated, currentTetromino.row, currentTetromino.col)) {
+        currentTetromino.matrix = rotated;
+        }
+    }
+    else if(e.key === 'ArrowDown') {
+        const newRow = currentTetromino.row + 1;
+        if(isValidMove(currentTetromino.matrix, newRow, currentTetromino.col)) {
+        currentTetromino.row = newRow;
+        }
+        else {
+        placeTetromino();
+        }
+    }
+    }
+
+    // Démarrer une nouvelle partie
+    function startGame() {
+    initPlayfield();
+    tetrominoSequence = [];
+    generateSequence();
+    currentTetromino = getNextTetromino();
+    gameOver = false;
+    gameOverScreen.classList.add('hidden');
+    startScreen.classList.add('hidden');
+    lastTime = 0;
+    dropCounter = 0;
+    animationId = requestAnimationFrame(update);
+    }
+
+    // Gestion des boutons
+    startBtn.addEventListener('click', startGame);
+    restartBtn.addEventListener('click', startGame);
+    document.addEventListener('keydown', handleKey);
+
+    // Charger la police pixel
+    const link = document.createElement('link');
+    link.href = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+</script>
